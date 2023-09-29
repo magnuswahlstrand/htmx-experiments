@@ -82,7 +82,6 @@ func main() {
 	})
 
 	app.Get("/get", func(c *fiber.Ctx) error {
-		fmt.Println("GET")
 		return c.SendString("Foo")
 	})
 	app.Get("/reload", func(c *fiber.Ctx) error {
