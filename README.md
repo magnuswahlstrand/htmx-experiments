@@ -7,3 +7,4 @@
       * delay:500
   * filters
     * targets
+  * Push url

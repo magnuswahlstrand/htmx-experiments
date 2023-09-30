@@ -1,0 +1,8 @@
+<div hx-get="/color" hx-trigger="{{.Trigger}}"
+     class="p-5 {{or .Color "bg-red-500"}}"
+     hx-swap="outerHTML"
+     hx-vals='{"current": "{{.Color}}", "trigger": "{{.Trigger}}"}'
+
+>
+    I will change color every time you hover over me!
+</div>
