@@ -1,20 +1,14 @@
 package main
 
 import (
-	"bufio"
 	"bytes"
 	_ "embed"
-	"fmt"
 	"github.com/gofiber/fiber/v2"
 	"github.com/gofiber/template/html/v2"
-	"github.com/valyala/fasthttp"
 	gohtml "html"
 	"html/template"
 	"log"
 	"os"
-	"slices"
-	"strconv"
-	"time"
 )
 
 type ExampleBase struct {
@@ -35,7 +29,7 @@ type Example struct {
 var examplesBases = []ExampleBase{
 	{
 		title:        "trigger: mouseover",
-		templateName: "examples/get-color",
+		templateName: "examples/color",
 		binding: fiber.Map{
 			"Trigger": "mouseenter",
 		},
@@ -47,7 +41,7 @@ var examplesBases = []ExampleBase{
 	},
 	{
 		title:        "trigger: every 1s",
-		templateName: "examples/get-color",
+		templateName: "examples/color",
 		binding: fiber.Map{
 			"Trigger": "every 1s",
 		},
@@ -59,18 +53,22 @@ var examplesBases = []ExampleBase{
 	},
 	{
 		title:        "Example 1",
-		templateName: "examples/get-load",
-		binding:      fiber.Map{},
-		description:  "This is a simple example",
+		templateName: "examples/get",
+		binding: fiber.Map{
+			"Trigger": "load",
+		},
+		description: "This is a simple example",
 		attributes: []string{
 			`hx-get="/get"`,
 			`hx-trigger="load"`,
 		},
 	},
 	{
-		title:        "Example 2",
-		binding:      fiber.Map{},
-		templateName: "examples/get-load-delay",
+		title: "Example 2",
+		binding: fiber.Map{
+			"Trigger": "load delay:2s",
+		},
+		templateName: "examples/get",
 		description:  "This is a simple example",
 		attributes: []string{
 			`hx-get="/get"`,
@@ -79,106 +77,8 @@ var examplesBases = []ExampleBase{
 	},
 }
 
-var colors = []string{
-	"bg-gray-100",
-	"bg-red-200",
-	"bg-yellow-300",
-	"bg-green-400",
-	"bg-blue-500",
-	"bg-indigo-600",
-	"bg-purple-700",
-	"bg-pink-800",
-}
-
 var isDev = os.Getenv("ENV") == "dev"
 
-func main() {
-	serverVersion := strconv.FormatInt(time.Now().Unix(), 10)
-	fmt.Println(serverVersion)
-
-	// Create a new engine
-	engine := html.New("static/views", ".html")
-	engine.Debug(isDev)
-	engine.Reload(isDev)
-
-	engine.AddFunc("escape", func(s string) string {
-		return gohtml.EscapeString(s)
-	})
-
-	examples := generateHtmxExamples(engine)
-	app := fiber.New(fiber.Config{
-		Views: engine,
-	})
-
-	app.Static("/styles", "./static/styles")
-
-	app.Get("/", func(c *fiber.Ctx) error {
-		return c.Render("index", fiber.Map{
-			"Title":         "Hello, HTMX!",
-			"ServerVersion": serverVersion,
-			"Examples":      examples,
-		}, "layouts/main")
-	})
-
-	app.Get("/get", func(c *fiber.Ctx) error {
-		return c.SendString("Hello from server")
-	})
-	app.Get("/reload", func(c *fiber.Ctx) error {
-		clientVersion := c.Query("timestamp", "")
-		if clientVersion != serverVersion {
-			c.Set("HX-Refresh", "true")
-		}
-		return c.SendString("")
-	})
-	app.Get("/color", func(c *fiber.Ctx) error {
-		current := c.Query("current", "")
-		trigger := c.Query("trigger", "")
-		foo := slices.Index(colors, current)
-
-		selectedIndex := (foo + 1) % len(colors)
-		return c.Render("examples/get-color", fiber.Map{
-			"Color":   colors[selectedIndex],
-			"Trigger": trigger,
-		})
-	})
-
-	app.Get("/sse", func(c *fiber.Ctx) error {
-		c.Set("Content-Type", "text/event-stream")
-		c.Set("Cache-Control", "no-cache")
-		c.Set("Connection", "keep-alive")
-		c.Set("Transfer-Encoding", "chunked")
-
-		c.Context().SetBodyStreamWriter(fasthttp.StreamWriter(func(w *bufio.Writer) {
-			var i int
-			msg := fmt.Sprintf("%d - the 2time is %v", i, time.Now())
-			fmt.Fprintf(w, "event: TriggerReload\n")
-			fmt.Fprintf(w, "data: Message: %s\n\n", msg)
-			fmt.Println(msg + "\n")
-			err := w.Flush()
-			for {
-				i++
-				if err != nil {
-					// Refreshing page in web browser will establish a new
-					// SSE connection, but only (the last) one is alive, so
-					// dead connections must be closed here.
-					fmt.Printf("Error while flushing: %v. Closing http connection.\n", err)
-					break
-				}
-				// TODO: lock here forever, instead?
-				time.Sleep(1 * time.Second)
-			}
-		}))
-
-		return nil
-	})
-
-	port := os.Getenv("PORT")
-	if port == "" {
-		port = "8080"
-		log.Printf("defaulting to port %s", port)
-	}
-	log.Fatal(app.Listen(":" + port))
-}
 func generateHtmxExamples(engine *html.Engine) []Example {
 	var examples []Example
 	for _, v := range examplesBases {
@@ -197,4 +97,38 @@ func generateHtmxExamples(engine *html.Engine) []Example {
 		})
 	}
 	return examples
+}
+func main() {
+
+	// Create a new engine
+	engine := html.New("static/views", ".html")
+	engine.Debug(isDev)
+	engine.Reload(isDev)
+
+	engine.AddFunc("escape", func(s string) string {
+		return gohtml.EscapeString(s)
+	})
+
+	examples := generateHtmxExamples(engine)
+	app := fiber.New(fiber.Config{Views: engine})
+
+	app.Get("/", func(c *fiber.Ctx) error {
+		return c.Render("index", fiber.Map{
+			"Title":         "Hello, HTMX!",
+			"ServerVersion": serverVersion,
+			"Examples":      examples,
+		}, "layouts/main")
+	})
+	app.Static("/styles", "./static/styles")
+	app.Get("/get", getHandler)
+	app.Get("/reload", reloadHandler)
+	app.Get("/color", colorHandler)
+	app.Get("/sse", sseHandler)
+
+	port := os.Getenv("PORT")
+	if port == "" {
+		port = "8080"
+		log.Printf("defaulting to port %s", port)
+	}
+	log.Fatal(app.Listen(":" + port))
 }
