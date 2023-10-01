@@ -46,6 +46,6 @@ var examplesBases = []ExampleBase{
 		title:        "hx-indicator",
 		templateName: "examples/indicator",
 		binding:      fiber.Map{},
-		description:  "Uses the hx-indicator attribute to show a loading indicator and Hyperscript to disable the button while the request is in flight",
+		description:  "Uses the 'hx-indicator' attribute to show a loading indicator and the 'hx-disabled-elt' attribute to disable the button while the request is in flight",
 	},
 }
