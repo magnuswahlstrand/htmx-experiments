@@ -30,8 +30,8 @@ type Example struct {
 var examplesBases = []ExampleBase{
 	{
 		title:        "click to edit",
-		templateName: "examples/contacts/get",
-		binding:      contact.Bindings(false),
+		templateName: "examples/contacts/initial",
+		binding:      fiber.Map{},
 		description:  "",
 	},
 	{
