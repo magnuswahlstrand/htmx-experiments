@@ -1,0 +1,8 @@
+<div>
+    <button hx-post="/slow" hx-indicator="#spinner"
+            class="flex flex-row border-2 border-black rounded items-center px-3 py-2 gap-2 disabled:opacity-50 disabled:bg-stone-200 disabled:cursor-not-allowed"
+            _="on click toggle @disabled until htmx:afterOnLoad">
+        Send request
+        <img id="spinner" class="htmx-indicator h-6 w-6 animate-spin" src="/styles/spinner.svg"/>
+    </button>
+</div>

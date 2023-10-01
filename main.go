@@ -9,8 +9,10 @@ import (
 	gohtml "html"
 	"html/template"
 	"log"
+	"net/http"
 	"os"
 	"sync"
+	"time"
 )
 
 type ExampleBase struct {
@@ -25,48 +27,6 @@ type Example struct {
 	Component   template.HTML
 	Tooltip     string
 	Description string
-}
-
-var examplesBases = []ExampleBase{
-	{
-		title:        "click to edit",
-		templateName: "examples/contacts/initial",
-		binding:      fiber.Map{},
-		description:  "",
-	},
-	{
-		title:        "mouseover",
-		templateName: "examples/color",
-		binding:      fiber.Map{"Trigger": "mouseenter"},
-		description:  "The box will fetch a new color from the server when you hover it",
-	},
-	{
-		title:        "every 1s",
-		templateName: "examples/color",
-		binding:      fiber.Map{"Trigger": "every 1s"},
-		description:  "The box will fetch a new color from the server every second",
-	},
-	{
-		title:        "every 1s with fade",
-		templateName: "examples/color",
-		binding: fiber.Map{
-			"Trigger": "every 1s",
-			"Animate": true,
-		},
-		description: "The box will fetch a new color from the server and fade it in using CSS transitions",
-	},
-	{
-		title:        "get on load",
-		templateName: "examples/get",
-		binding:      fiber.Map{"Trigger": "load"},
-		description:  "Fetches a new message from the server when the page loads",
-	},
-	{
-		title:        "get after delay",
-		binding:      fiber.Map{"Trigger": "load delay:2s"},
-		templateName: "examples/get",
-		description:  "Fetches a new message from the server when the page loads after a 2 second delay",
-	},
 }
 
 var isDev = os.Getenv("ENV") == "dev"
@@ -116,6 +76,7 @@ func main() {
 	app.Get("/reload", reloadHandler)
 	app.Get("/color", colorHandler)
 	app.Get("/sse", sseHandler)
+	app.Post("/slow", slowHandler)
 	contacts := app.Group("/contacts")
 	contacts.Put("/1", contactsUpdatePutHandler)
 	contacts.Get("/1", contactGetHandler)
@@ -127,6 +88,11 @@ func main() {
 		log.Printf("defaulting to port %s", port)
 	}
 	log.Fatal(app.Listen(":" + port))
+}
+
+func slowHandler(ctx *fiber.Ctx) error {
+	time.Sleep(1 * time.Second)
+	return ctx.SendStatus(http.StatusNoContent)
 }
 
 type Contact struct {
