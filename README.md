@@ -1,10 +1,5 @@
-
-
-* triggers 
-  * modifiers 
-    * https://htmx.org/docs/#trigger-modifiers
-      * Once
-      * delay:500
-  * filters
-    * targets
-  * Push url
+## TODO:
+* [ ] Add a nice spinner
+* [ ] Active search example
+* [ ] Click to load example
+* [ ] Add code snippets with [chroma](https://github.com/alecthomas/chroma#the-html-formatter)
