@@ -3,7 +3,6 @@ package main
 import (
 	"bytes"
 	_ "embed"
-	"fmt"
 	"github.com/gofiber/fiber/v2"
 	"github.com/gofiber/template/html/v2"
 	gohtml "html"
@@ -11,6 +10,7 @@ import (
 	"log"
 	"net/http"
 	"os"
+	"strconv"
 	"sync"
 	"time"
 )
@@ -81,6 +81,7 @@ func main() {
 	contacts.Put("/1", contactsUpdatePutHandler)
 	contacts.Get("/1", contactGetHandler)
 	contacts.Get("/1/edit", contactEditGetHandler)
+	app.Get("/click_to_load", clickToLoadHandler)
 
 	port := os.Getenv("PORT")
 	if port == "" {
@@ -93,6 +94,23 @@ func main() {
 func slowHandler(ctx *fiber.Ctx) error {
 	time.Sleep(1 * time.Second)
 	return ctx.SendStatus(http.StatusNoContent)
+}
+
+func clickToLoadHandler(c *fiber.Ctx) error {
+	// Add a delay to make the example more interesting
+	time.Sleep(100 * time.Millisecond)
+
+	pageStr := c.Query("page", "0")
+	page, err := strconv.Atoi(pageStr)
+	if err != nil {
+		return c.Status(fiber.StatusBadRequest).SendString(err.Error())
+	}
+
+	agentID := 2*page + 1
+	return c.Render("examples/click_to_load/rows", fiber.Map{
+		"Rows": []int{agentID, agentID + 1},
+		"Page": page + 1,
+	})
 }
 
 type Contact struct {
@@ -138,6 +156,5 @@ func contactsUpdatePutHandler(c *fiber.Ctx) error {
 
 	contact.Email = update.Email
 	contact.Name = update.Name
-	fmt.Println("contact", contact)
 	return c.Render("examples/contacts/get", contact.Bindings(false))
 }

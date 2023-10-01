@@ -48,4 +48,12 @@ var examplesBases = []ExampleBase{
 		binding:      fiber.Map{},
 		description:  "Uses the 'hx-indicator' attribute to show a loading indicator and the 'hx-disabled-elt' attribute to disable the button while the request is in flight",
 	},
+	{
+		title:        "click to load",
+		templateName: "examples/click_to_load/table",
+		binding: fiber.Map{
+			"Rows": []int{1, 2},
+		},
+		description: "Click the button to load more rows from the server",
+	},
 }

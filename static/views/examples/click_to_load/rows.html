@@ -1,0 +1,23 @@
+{{range .Rows}}
+<tr>
+    <td class="text-center">{{.}}</td>
+    <td class="text-center">Agent Smith #{{.}}</td>
+</tr>
+{{end}}
+<tr id="replaceMe">
+    <td colspan="2">
+        <button
+                hx-target="#replaceMe"
+                hx-swap="outerHTML"
+                class="mt-3 mx-auto flex flex-row border-2 border-black rounded items-center px-3 py-2 gap-2 disabled:opacity-50 disabled:bg-stone-200 disabled:cursor-not-allowed"
+                hx-indicator="#spinner"
+                hx-disabled-elt="this"
+                hx-get="/click_to_load?page={{or .Page "1" }}"
+        >
+        Load more agents
+        <img id="spinner" class="htmx-indicator h-6 w-6 animate-spin" src="/styles/spinner.svg"/>
+        </button>
+    </td>
+</tr>
+
+
