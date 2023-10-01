@@ -4,9 +4,7 @@ import (
 	"bufio"
 	"bytes"
 	_ "embed"
-	"encoding/json"
 	"fmt"
-	"github.com/codecat/melody"
 	"github.com/gofiber/fiber/v2"
 	"github.com/gofiber/template/html/v2"
 	"github.com/valyala/fasthttp"
@@ -174,30 +172,6 @@ func main() {
 		return nil
 	})
 
-	// Websocket stuff
-	m := melody.New()
-
-	app.Get("/ws", func(c *fiber.Ctx) error {
-		return m.HandleRequest(c.Context())
-	})
-
-	m.HandleMessage(func(s *melody.Session, msg []byte) {
-		var in WsMessage
-		err := json.Unmarshal(msg, &in)
-		if err != nil {
-			fmt.Println("Error parsing message", err)
-			return
-		}
-
-		//msg2, err := json.Marshal(in)
-		//if err != nil {
-		//	fmt.Println("Error marshalling message", err)
-		//	return
-		//}
-
-		m.Broadcast([]byte(fmt.Sprintf("<div hx-swap-oob='beforeend:#messages'><p><b>{username}</b>: %s</p></div><div hx-swap-oob='beforeend:#messages2'><p>%s,%s</p></div>", in.ChatMessage, in.ChatMessage, in.ChatMessage)))
-	})
-
 	port := os.Getenv("PORT")
 	if port == "" {
 		port = "8080"
@@ -205,11 +179,6 @@ func main() {
 	}
 	log.Fatal(app.Listen(":" + port))
 }
-
-type WsMessage struct {
-	ChatMessage string `json:"chat_message"`
-}
-
 func generateHtmxExamples(engine *html.Engine) []Example {
 	var examples []Example
 	for _, v := range examplesBases {

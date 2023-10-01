@@ -33,20 +33,4 @@
     <div hx-get="/reload" hx-trigger="sse:TriggerReload" hx-vals='{"timestamp": "{{.ServerVersion}}"}'></div>
 </div>
 
-<div hx-ext="ws" ws-connect="/ws">
-    <div id="notifications" hx-swap-oob="beforeend">
-        New message received
-    </div>
-    <div id="messages">
-        New message received
-    </div>
-    <!-- will be swapped using an extension -->
-    <div id="chat_room" hx-swap-oob="morphdom">
-        ....
-    </div>
-    <form id="form" ws-send>
-        <input name="chat_message">
-    </form>
-</div>
-
 {{template "partials/footer" .}}
