@@ -18,14 +18,13 @@ type ExampleBase struct {
 	templateName string
 	binding      fiber.Map
 	description  string
-	attributes   []string
 }
 
 type Example struct {
 	Title       string
 	Component   template.HTML
+	Tooltip     string
 	Description string
-	Attributes  []string
 }
 
 var examplesBases = []ExampleBase{
@@ -33,56 +32,31 @@ var examplesBases = []ExampleBase{
 		title:        "click to edit",
 		templateName: "examples/contacts/get",
 		binding:      contact.Bindings(false),
-		description:  "This is a simple example",
-		attributes:   []string{},
+		description:  "",
 	},
 	{
-		title:        "trigger: mouseover",
+		title:        "mouseover",
 		templateName: "examples/color",
-		binding: fiber.Map{
-			"Trigger": "mouseenter",
-		},
-		description: "This is a simple example",
-		attributes: []string{
-			`hx-get="/color"`,
-			`hx-trigger="mouseenter"`,
-		},
+		binding:      fiber.Map{"Trigger": "mouseenter"},
+		description:  "The box will fetch a new color from the server when you hover it",
 	},
 	{
-		title:        "trigger: every 1s",
+		title:        "every 1s",
 		templateName: "examples/color",
-		binding: fiber.Map{
-			"Trigger": "every 1s",
-		},
-		description: "This is a simple example",
-		attributes: []string{
-			`hx-get="/color"`,
-			`hx-trigger="every 1s"`,
-		},
+		binding:      fiber.Map{"Trigger": "every 1s"},
+		description:  "The box will fetch a new color from the server every second",
 	},
 	{
-		title:        "Example 1",
+		title:        "get on load",
 		templateName: "examples/get",
-		binding: fiber.Map{
-			"Trigger": "load",
-		},
-		description: "This is a simple example",
-		attributes: []string{
-			`hx-get="/get"`,
-			`hx-trigger="load"`,
-		},
+		binding:      fiber.Map{"Trigger": "load"},
+		description:  "Fetches a new message from the server when the page loads",
 	},
 	{
-		title: "Example 2",
-		binding: fiber.Map{
-			"Trigger": "load delay:2s",
-		},
+		title:        "get after delay",
+		binding:      fiber.Map{"Trigger": "load delay:2s"},
 		templateName: "examples/get",
-		description:  "This is a simple example",
-		attributes: []string{
-			`hx-get="/get"`,
-			`hx-trigger="load delay:2s"`,
-		},
+		description:  "Fetches a new message from the server when the page loads after a 2 second delay",
 	},
 }
 
@@ -101,8 +75,8 @@ func generateHtmxExamples(engine *html.Engine) []Example {
 		examples = append(examples, Example{
 			Title:       v.title,
 			Component:   template.HTML(buffer.String()),
+			Tooltip:     v.description,
 			Description: v.description,
-			Attributes:  v.attributes,
 		})
 	}
 	return examples
