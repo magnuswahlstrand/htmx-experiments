@@ -47,6 +47,15 @@ var examplesBases = []ExampleBase{
 		description:  "The box will fetch a new color from the server every second",
 	},
 	{
+		title:        "every 1s with fade",
+		templateName: "examples/color",
+		binding: fiber.Map{
+			"Trigger": "every 1s",
+			"Animate": true,
+		},
+		description: "The box will fetch a new color from the server and fade it in using CSS transitions",
+	},
+	{
 		title:        "get on load",
 		templateName: "examples/get",
 		binding:      fiber.Map{"Trigger": "load"},

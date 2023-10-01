@@ -24,12 +24,14 @@ var colors = []string{
 func colorHandler(c *fiber.Ctx) error {
 	current := c.Query("current", "")
 	trigger := c.Query("trigger", "")
+	animate := c.Query("animate", "false")
 	foo := slices.Index(colors, current)
 
 	selectedIndex := (foo + 1) % len(colors)
 	return c.Render("examples/color", fiber.Map{
 		"Color":   colors[selectedIndex],
 		"Trigger": trigger,
+		"Animate": animate == "true",
 	})
 }
 
