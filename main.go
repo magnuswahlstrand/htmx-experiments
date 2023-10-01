@@ -3,12 +3,14 @@ package main
 import (
 	"bytes"
 	_ "embed"
+	"fmt"
 	"github.com/gofiber/fiber/v2"
 	"github.com/gofiber/template/html/v2"
 	gohtml "html"
 	"html/template"
 	"log"
 	"os"
+	"sync"
 )
 
 type ExampleBase struct {
@@ -27,6 +29,13 @@ type Example struct {
 }
 
 var examplesBases = []ExampleBase{
+	{
+		title:        "click to edit",
+		templateName: "examples/contacts/get",
+		binding:      contact.Bindings(false),
+		description:  "This is a simple example",
+		attributes:   []string{},
+	},
 	{
 		title:        "trigger: mouseover",
 		templateName: "examples/color",
@@ -124,6 +133,10 @@ func main() {
 	app.Get("/reload", reloadHandler)
 	app.Get("/color", colorHandler)
 	app.Get("/sse", sseHandler)
+	contacts := app.Group("/contacts")
+	contacts.Put("/1", contactsUpdatePutHandler)
+	contacts.Get("/1", contactGetHandler)
+	contacts.Get("/1/edit", contactEditGetHandler)
 
 	port := os.Getenv("PORT")
 	if port == "" {
@@ -131,4 +144,51 @@ func main() {
 		log.Printf("defaulting to port %s", port)
 	}
 	log.Fatal(app.Listen(":" + port))
+}
+
+type Contact struct {
+	Name  string
+	Email string
+}
+
+func (c Contact) Bindings(edit bool) fiber.Map {
+	return fiber.Map{
+		"Name":  c.Name,
+		"Email": c.Email,
+		"Edit":  edit,
+	}
+}
+
+var contactMu = &sync.Mutex{}
+var contact = Contact{
+	Name:  "Magnus",
+	Email: "magnus@mail.com",
+}
+
+func contactGetHandler(c *fiber.Ctx) error {
+	contactMu.Lock()
+	defer contactMu.Unlock()
+	return c.Render("examples/contacts/get", contact.Bindings(false))
+}
+
+func contactEditGetHandler(c *fiber.Ctx) error {
+	contactMu.Lock()
+	defer contactMu.Unlock()
+
+	return c.Render("examples/contacts/edit", contact.Bindings(true))
+}
+
+func contactsUpdatePutHandler(c *fiber.Ctx) error {
+	contactMu.Lock()
+	defer contactMu.Unlock()
+
+	var update Contact
+	if err := c.BodyParser(&update); err != nil {
+		return c.Status(fiber.StatusBadRequest).SendString(err.Error())
+	}
+
+	contact.Email = update.Email
+	contact.Name = update.Name
+	fmt.Println("contact", contact)
+	return c.Render("examples/contacts/get", contact.Bindings(false))
 }
