@@ -1,0 +1,3 @@
+{{with $x := button_args "Open modal" `hx-get="/modal" hx-target="body" hx-swap="beforeend"`}}
+    {{template "partials/button" $x}}
+{{end}}

@@ -58,6 +58,7 @@ func sseHandler(c *fiber.Ctx) error {
 	c.Context().SetBodyStreamWriter(fasthttp.StreamWriter(func(w *bufio.Writer) {
 		var i int
 		msg := fmt.Sprintf("%d - the 2time is %v", i, time.Now())
+		fmt.Fprintf(w, "event: TriggerReload\n")
 		fmt.Fprintf(w, "data: Message: %s\n\n", msg)
 		err := w.Flush()
 		for {

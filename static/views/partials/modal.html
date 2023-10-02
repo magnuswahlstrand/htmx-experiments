@@ -1,0 +1,18 @@
+<div id="modal" _="on closeModal add .closing then wait for animationend then remove me">
+    <div class="modal-underlay" _="on click trigger closeModal"></div>
+    <div class="modal-content">
+        <h1 class="text-2xl font-semibold mb-2">Modal Dialog</h1>
+        This is the modal content.
+        You can put anything here, like text, or a form, or an image. Press 'Escape' to close it.
+
+        <br>
+        {{with $x := button_args "Close" `_="on click trigger closeModal"`}}
+            {{template "partials/button" $x}}
+        {{end}}
+    </div>
+</div>
+<script>
+    document.getElementById('modal').addEventListener('closeModal', function(evt) {
+        console.log('Close Modal triggered 2')
+    });
+</script>

@@ -50,16 +50,31 @@ func generateHtmxExamples(engine *html.Engine) []Example {
 	}
 	return examples
 }
+
+type ButtonArgs struct {
+	Label      string
+	Attributes template.HTMLAttr
+}
+
 func main() {
 
 	// Create a new engine
 	engine := html.New("static/views", ".html")
 	engine.Debug(isDev)
 	engine.Reload(isDev)
+	engine.AddFunc("button_args", func(name string, attributes string) ButtonArgs {
+		return ButtonArgs{
+			Label:      name,
+			Attributes: template.HTMLAttr(attributes),
+		}
+	})
 
 	engine.AddFunc("escape", func(s string) string {
 		return gohtml.EscapeString(s)
 	})
+	//engine.AddFunc("unescape", func(s string) template.HTML {
+	//	return template.HTML(s)
+	//})
 
 	examples := generateHtmxExamples(engine)
 	app := fiber.New(fiber.Config{Views: engine})
@@ -82,6 +97,7 @@ func main() {
 	contacts.Get("/1", contactGetHandler)
 	contacts.Get("/1/edit", contactEditGetHandler)
 	app.Get("/click_to_load", clickToLoadHandler)
+	app.Get("/modal", modalHandler)
 
 	port := os.Getenv("PORT")
 	if port == "" {
@@ -111,6 +127,10 @@ func clickToLoadHandler(c *fiber.Ctx) error {
 		"Rows": []int{agentID, agentID + 1},
 		"Page": page + 1,
 	})
+}
+
+func modalHandler(ctx *fiber.Ctx) error {
+	return ctx.Render("partials/modal", fiber.Map{})
 }
 
 type Contact struct {

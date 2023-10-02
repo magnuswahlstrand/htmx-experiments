@@ -56,4 +56,10 @@ var examplesBases = []ExampleBase{
 		},
 		description: "Click the button to load more rows from the server",
 	},
+	{
+		title:        "open modal",
+		templateName: "examples/modal",
+		binding:      fiber.Map{},
+		description:  "Will open a modal when you click the button",
+	},
 }

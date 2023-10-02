@@ -1,10 +1,10 @@
-<span class="cursor-pointer relative group hover:opacity-100">
-<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+<span class="cursor-pointer relative group">
+    <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor"
      stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-info"><circle cx="12" cy="12"
                                                                                                         r="10"/><path
         d="M12 16v-4"/><path d="M12 8h.01"/></svg>
 
-    <span class="absolute bottom-full left-0 w-64 bg-black text-white text-md p-2 rounded opacity-0 group-hover:opacity-100 transition duration-300">
+    <span class="absolute bottom-full left-0 w-64 bg-black text-white text-md p-2 rounded hidden group-hover:block transition duration-300">
       {{ . }}
     </span>
 </span>
