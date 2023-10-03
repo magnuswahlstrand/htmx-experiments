@@ -1,8 +1,0 @@
-<div id="color" hx-get="/color?animate={{if .Animate}}true{{end}}" hx-trigger="{{.Trigger}}"
-     class="p-5 {{if .Animate}} ease-in-out	duration-1000{{end}} {{or .Color " bg-red-500"}}"
-hx-swap="outerHTML"
-hx-vals='{"current": "{{.Color}}", "trigger": "{{.Trigger}}"}'
-
->
-&nbsp;
-</div>

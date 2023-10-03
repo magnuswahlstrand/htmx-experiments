@@ -1,0 +1,189 @@
+package components
+
+import "strconv"
+import "github.com/magnuswahlstrand/htmx-experiments/types"
+
+templ Color(trigger string, color string, animate bool) {
+<div id="color"
+    if animate {
+        class={templ.SafeClass("p-5 ease-in-out	duration-1000 " + color)}
+        hx-get="/color?animate=true"
+    } else {
+        class={templ.SafeClass("p-5 " + color)}
+        hx-get="/color"
+    }
+    hx-trigger={trigger}
+    hx-swap="outerHTML"
+    hx-vals={`"current": "`+ color + `", "trigger": "`+ trigger + `"`}
+>
+    &nbsp;
+</div>
+}
+
+templ Description() {
+    <div class="text-lg mb-4">
+    A collection of examples using <a href="https://htmx.org/">htmx</a>.
+    <ul class="list-disc list-inside ml-5">
+        <li>
+            HTML generated server-side from a backend built in Go with
+            <a href="https://gofiber.io">Fiber</a>.
+        </li>
+        <li>
+            Frontend is built using
+            <a href="https://tailwindcss.com/">Tailwind CSS</a>
+            and
+            <a href="https://htmx.org/">htmx</a>.
+        </li>
+        <li>
+            Deployed to Cloud Run.
+        </li>
+    </ul>
+    If you are interested in the source code, you can find it on <a
+        href="https://github.com/magnuswahlstrand/htmx-experiments">GitHub</a>
+
+    </div>
+}
+
+templ Page(serverVersion string) {
+    <!DOCTYPE html>
+    <html lang="en">
+    <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <title>HTMX Examples</title>
+        <script src="https://unpkg.com/htmx.org@1.9.6"
+                integrity="sha384-FhXw7b6AlE/jyjlZH5iHa/tTe9EpJ1Y55RjcgPbjeWMskSxZt1v9qkxLJWNJaGni"
+                crossorigin="anonymous"></script>
+        <script src="https://unpkg.com/hyperscript.org@0.9.11"></script>
+        <script src="https://unpkg.com/htmx.org/dist/ext/debug.js"></script>
+        <script src="https://unpkg.com/htmx.org/dist/ext/sse.js"></script>
+        <link rel="stylesheet" href="styles.css" />
+    </head>
+    <h1 class="text-4xl font-bold mb-4">Hello HTMX</h1>
+    <body class="bg-gray-100 p-4" _="on keyup[key is 'Escape'] if #modal exists trigger closeModal on #modal">
+    @Description()
+    @Examples()
+    @SseReconnecter(serverVersion)
+    @ModalStyling()
+    </body>
+    </html>
+}
+
+
+templ Spinner(suffix string) {
+    <img id={"spinner-"+suffix} class="htmx-indicator h-6 w-6 animate-spin" src="/spinner.svg"/>
+}
+
+
+
+
+templ SseReconnecter(serverVersion string) {
+    <div hx-ext="sse" sse-connect="/sse">
+        <div hx-get="/reload" hx-trigger="sse:TriggerReload" hx-vals={`{"timestamp": "` + serverVersion + `"}`}></div>
+    </div>
+}
+
+templ ClickToLoadRows(rows []int, page int) {
+    for _, row := range rows {
+        <tr>
+            <td class="text-center">{strconv.Itoa(row)}</td>
+            <td class="text-center">Agent Smith #{strconv.Itoa(row)}</td>
+        </tr>
+    }
+    <tr id="replaceMe">
+        <td colspan="2">
+            <button
+                    hx-target="#replaceMe"
+                    hx-swap="outerHTML"
+                    class="mt-3 mx-auto flex flex-row border-2 border-black rounded items-center px-3 py-2 gap-2 disabled:opacity-50 disabled:bg-stone-200 disabled:cursor-not-allowed"
+                    hx-indicator="#spinner"
+                    hx-disabled-elt="this"
+                    hx-get={"/click_to_load?page=" + strconv.Itoa(page)}
+            >
+            Load more agents
+            <img id="spinner" class="htmx-indicator h-6 w-6 animate-spin" src="/spinner.svg"/>
+            </button>
+        </td>
+    </tr>
+}
+
+const buttonClasses ="mt-3 mx-auto flex flex-row border-2 border-black rounded items-center px-3 py-2 gap-2 disabled:opacity-50 disabled:bg-stone-200 disabled:cursor-not-allowed "
+var initialRows = []int{1,2}
+
+templ Modal() {
+    <div id="modal" _="on closeModal add .closing then wait for animationend then remove me">
+        <div class="modal-underlay" _="on click trigger closeModal"></div>
+        <div class="modal-content">
+            <h1 class="text-2xl font-semibold mb-2">Modal Dialog</h1>
+            This is the modal content.
+            You can put anything here, like text, or a form, or an image. Press 'Escape' to close it.
+
+            <br />
+            <button
+                class={buttonClasses}
+                _="on click trigger closeModal">
+                Close
+            </button>
+        </div>
+    </div>
+}
+
+templ ContactShared(contact types.Contact, edit bool) {
+    <div class="flex flex-col">
+            <label class="block text-gray-700 text-sm font-bold mb-2">Name</label>
+            <input
+                type="text" name="name" value={contact.Name}
+                disabled?={!edit}
+                class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline" />
+            </div>
+            <div class="flex flex-col">
+            <label class="block text-gray-700 text-sm font-bold mb-2">Email Address</label>
+            <input
+                type="text"
+                name="email"
+                value={contact.Email}
+                disabled?={!edit}
+                class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline" />
+            </div>
+
+}
+
+templ ContactForm(contact types.Contact, edit bool) {
+    if edit {
+        <form
+        hx-put="/contacts/1"
+        hx-target="this"
+        hx-swap="outerHTML"
+        class=""
+        >
+            @ContactShared(contact, edit)
+            <div class="flex flex-row mt-4 gap-2">
+            <button class="bg-blue-500 rounded-lg border-2 border-black p-2">Submit</button>
+            <button class="bg-blue-500 rounded-lg border-2 border-black p-2" hx-get="/contacts/1">Cancel</button>
+            </div>
+        </form>
+
+    } else {
+        <div hx-target="this" hx-swap="outerHTML">
+            @ContactShared(contact, edit)
+            <button hx-get="/contacts/1/edit" class="bg-blue-500 rounded-lg border-2 border-black p-2 mt-4">
+            Click To Edit
+            </button>
+      </div>
+    }
+
+}
+
+
+templ Tooltip(content string) {
+    <span class="cursor-pointer relative group">
+    <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+    stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-info"><circle cx="12" cy="12"
+    r="10"/><path
+    d="M12 16v-4"/><path d="M12 8h.01"/></svg>
+
+        <span class="absolute bottom-full left-0 w-64 bg-black text-white text-md p-2 rounded hidden group-hover:block transition duration-300">
+        { content }
+        </span>
+    </span>
+}

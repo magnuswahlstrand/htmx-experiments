@@ -3,6 +3,7 @@ module github.com/magnuswahlstrand/htmx-experiments
 go 1.21
 
 require (
+	github.com/a-h/templ v0.2.364
 	github.com/gofiber/fiber/v2 v2.49.2
 	github.com/gofiber/template/html/v2 v2.0.5
 	github.com/valyala/fasthttp v1.49.0
